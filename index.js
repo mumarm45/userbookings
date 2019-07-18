@@ -20,6 +20,11 @@ var docClient = new AWS.DynamoDB.DocumentClient({
 
 });
 
+// Generic error handler used by all endpoints.
+function handleError(res, reason, message, code) {
+    console.log("ERROR: " + reason);
+    res.status(code || 500).json({ "error": message });
+}
 app.get('/users/:id/bookings', (req, res) => {
     var params = {
         TableName: "users",
@@ -39,8 +44,13 @@ app.get('/users/:id/bookings', (req, res) => {
     });
     promise.then((success) => {
         res.send(success);
+    }, (error) => {
+        handleError(error);
     })
 });
 
 
-app.listen('8088', () => console.log('Started Listening'));
+var server = app.listen(process.env.PORT || 8080, function() {
+    var port = server.address().port;
+    console.log("App now running on port", port);
+});
